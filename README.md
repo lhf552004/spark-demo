@@ -1,5 +1,11 @@
 # Spark demo
 
+## Run docker-compose
+
+```
+docker-compose up -d
+```
+
 ## Upload input.txt to HDFS
 
 ```
