@@ -1,0 +1,62 @@
+services:
+  # Hadoop Namenode
+  hadoop-namenode:
+    image: bde2020/hadoop-namenode
+    container_name: hadoop-namenode
+    environment:
+      - CLUSTER_NAME=test-cluster
+    ports:
+      - "9870:9870" # HDFS web UI
+      - "9000:9000" # HDFS service port
+      - "8020:8020" # HDFS service port new
+
+    volumes:
+      - ./data/input.txt:/tmp/input.txt
+      # - ./hadoop-config/core-site.xml:/opt/hadoop-2.7.4/etc/hadoop/core-site.xml
+      # - ./hadoop-config/hdfs-site.xml:/opt/hadoop-2.7.4/etc/hadoop/hdfs-site.xml
+    networks:
+      - hadoop-spark-network
+
+  # Hadoop Datanode
+  hadoop-datanode:
+    image: bde2020/hadoop-datanode
+    container_name: hadoop-datanode
+    environment:
+      - CLUSTER_NAME=test-cluster
+      - CORE_CONF_fs_defaultFS=hdfs://hadoop-namenode:8020
+    depends_on:
+      - hadoop-namenode
+    networks:
+      - hadoop-spark-network
+
+  # Spark Master
+  spark-master:
+    image: bitnami/spark
+    container_name: spark-master
+    environment:
+      - SPARK_MODE=master
+    ports:
+      - "8080:8080" # Spark master web UI
+      - "7077:7077" # Spark master service port
+    volumes:
+      - ./spark-jobs/word_count.py:/opt/spark-apps/word_count.py
+    networks:
+      - hadoop-spark-network
+
+  # Spark Worker
+  spark-worker:
+    image: bitnami/spark
+    container_name: spark-worker
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+    depends_on:
+      - spark-master
+    volumes:
+      - ./spark-jobs/word_count.py:/opt/spark-apps/word_count.py
+    networks:
+      - hadoop-spark-network
+
+networks:
+  hadoop-spark-network:
+    driver: bridge
