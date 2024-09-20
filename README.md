@@ -1,11 +1,13 @@
-Upload input.txt to HDFS
+# Spark demo
+
+## Upload input.txt to HDFS
 
 ```
 hadoop fs -put /path/to/input.txt hdfs://localhost:8020/data/input.txt
 
 ```
 
-Run spark job
+## Run spark job
 
 ```
 docker exec -it spark-master bash
